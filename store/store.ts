@@ -4,6 +4,7 @@ import categorySlice from "@/store/categorySlice";
 import {generalSlice} from "@/store/generalSlice";
 import cartSlice from "@/store/cartSlice";
 import filterSlice from "@/store/filterSlice";
+import orderSlice from "@/store/orderSlice";
 
 
 export const store = configureStore({
@@ -12,7 +13,8 @@ export const store = configureStore({
         category: categorySlice,
         general: generalSlice.reducer,
         cart: cartSlice,
-        productFilter: filterSlice
+        productFilter: filterSlice,
+        order: orderSlice
     }
 })
 

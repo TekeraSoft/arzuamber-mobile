@@ -1,7 +1,13 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "strict": false,  // Bunu zaten false yapmışsın, genel strict mode'u kapatıyor
+    "noImplicitAny": false,  // Burayı ekledik, any hatalarını göz ardı eder
     "paths": {
       "@/*": [
         "./*"

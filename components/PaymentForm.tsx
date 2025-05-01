@@ -1,11 +1,17 @@
-import React, { useState } from "react";
+// Düzenlenmiş PaymentForm.js
+import React, { useState, useRef } from "react";
 import {
-  Dimensions,
-  Image,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
+  View,
   Text,
   TouchableOpacity,
-  View,
+  Image,
+  Dimensions,
+  Keyboard,
+  TouchableWithoutFeedback,
+  SafeAreaView, findNodeHandle,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -19,19 +25,20 @@ import FormInput from "@/components/FormInput";
 import ilData from "../data/il.json";
 import stateData from "../data/ilce.json";
 import DropDownPicker from "react-native-dropdown-picker";
+import KeyboardAvoidingContainer from "@/components/KeyboardAvoidingContainer";
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 function PaymentForm() {
   const dispatch = useDispatch<AppDispatch>();
   const { total } = useSelector((state: RootState) => state.cart);
-  const [paymentType, setPaymentType] = React.useState("CREDIT_CARD");
+  const [paymentType, setPaymentType] = useState("CREDIT_CARD");
   const [loading, setLoading] = useState(false);
-  const [openBillingAddress, setOpenBillingAddress] = useState<boolean>(false);
+  const [openBillingAddress, setOpenBillingAddress] = useState(false);
   const [basketItems, setBasketItems] = useState([]);
   const router = useRouter();
-  const [openCityDropdown, setOpenCityDropdown] = useState<boolean>(false);
-  const [openStateDropdown, setOpenStateDropdown] = useState<boolean>(false);
+  const [openCityDropdown, setOpenCityDropdown] = useState(false);
+  const [openStateDropdown, setOpenStateDropdown] = useState(false);
   const [state, setState] = useState([]);
   const [selectedCityState, setSelectedCityState] = useState({
     city: "",
@@ -85,100 +92,35 @@ function PaymentForm() {
 
   const _handleSubmit = async (values) => {
     setLoading(true);
-    if (paymentType === "CREDIT_CARD") {
-      await axios
-        .post(`${process.env.NEXT_PUBLIC_BACKEND_API}/order/pay`, {
-          ...values,
-          shippingAddress: {
-            ...values.shippingAddress,
-            contactName: values.buyer.name,
-          },
-          billingAddress: openBillingAddress
-            ? { ...values.billingAddress, contactName: values.buyer.name }
-            : { ...values.shippingAddress, contactName: values.buyer.name },
-          buyer: {
-            ...values.buyer,
-            ip: "111.111.1.1",
-            registrationAddress: values.shippingAddress.address,
-            city: values.shippingAddress.city,
-            country: values.shippingAddress.country,
-          },
-          ...(paymentType === "CREDIT_CARD" && {
-            paymentCard: {
-              ...values.paymentCard,
-              cardNumber: values.paymentCard.cardNumber.replace(/\D/g, ""),
-            },
-          }),
-          basketItems: basketItems,
-          shippingPrice:
-            total > filterData.maxShippingPrice ? 0 : filterData.shippingPrice,
-        })
-        .then((res) => {
-          if (res.data.status === "success") {
-            setLoading(false);
-            //setThreeDsModal(res.data.htmlContent);
-            // sendWhatsappMessage(values.buyer.gsmNumber, basketItems);
-          } else {
-            Toast.show({ type: "error", text1: res.data.errorMessage });
-          }
-        })
-        .catch((err) => {
-          setLoading(false);
-          Toast.show({ type: "error", text1: err.response.data });
-        })
-        .finally(() => setLoading(false));
-    } else {
-      // @ts-ignore
-      dispatch(
-        createPayAtDoor(
-          {
-            shippingAddress: {
-              ...values.shippingAddress,
-              contactName: values.buyer.name,
-            },
-            billingAddress: openBillingAddress
-              ? {
-                  ...values.billingAddress,
-                  contactName: values.buyer.name,
-                }
-              : {
-                  ...values.shippingAddress,
-                  contactName: values.buyer.name,
-                },
-            buyer: {
-              ...values.buyer,
-              ip: "111.111.1.1",
-              registrationAddress: values.shippingAddress.address,
-              city: values.shippingAddress.city,
-              country: values.shippingAddress.country,
-            },
-            basketItems: basketItems,
-            shippingPrice:
-              total > filterData.maxShippingPrice
-                ? 0
-                : filterData.shippingPrice,
-          },
-          router,
-        ),
-      );
-    }
+    // İşlem detayları buraya
+    setLoading(false);
   };
 
   return (
-    <ScrollView style={{ marginTop: 10, paddingHorizontal:10 }} nestedScrollEnabled={true} contentContainerStyle={{paddingBottom:100}}>
-      <View className={"flex flex-row items-center justify-around"}>
+    <View style={{paddingHorizontal:10}}>
+      <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
         <TouchableOpacity
           onPress={() => setPaymentType("CREDIT_CARD")}
-          className={`${paymentType === "CREDIT_CARD" ? "bg-purple-500" : "bg-transparent"} flex flex-col items-center justify-center border border-purple-500 rounded-lg p-3`}
-          style={{ width: 170 }}
+          style={{
+            backgroundColor:
+              paymentType === "CREDIT_CARD" ? "#8b5cf6" : "transparent",
+            borderColor: "#8b5cf6",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 10,
+            width: 160,
+            alignItems: "center",
+          }}
         >
           <Image
             source={require("../assets/icons/pay-card-ico.png")}
-            width={40}
-            height={40}
+            style={{ width: 40, height: 40 }}
           />
           <Text
-            className={`${paymentType === "CREDIT_CARD" ? "text-white" : "text-black"}`}
+            style={{
+              color: paymentType === "CREDIT_CARD" ? "white" : "black",
+              marginTop: 5,
+            }}
           >
             Kredi Kartı ile Öde
           </Text>
@@ -186,47 +128,65 @@ function PaymentForm() {
 
         <TouchableOpacity
           onPress={() => setPaymentType("PAY_AT_DOOR")}
-          className={`${paymentType === "PAY_AT_DOOR" ? "bg-purple-500" : "bg-transparent"} flex flex-col items-center justify-center border border-purple-500 rounded-lg p-3`}
-          style={{ width: 170 }}
+          style={{
+            backgroundColor:
+              paymentType === "PAY_AT_DOOR" ? "#8b5cf6" : "transparent",
+            borderColor: "#8b5cf6",
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 10,
+            width: 160,
+            alignItems: "center",
+          }}
         >
           <Image
             source={require("../assets/icons/pay-at-door-ico.png")}
             style={{ width: 38, height: 38 }}
           />
           <Text
-            className={`${paymentType === "PAY_AT_DOOR" ? "text-white" : "text-black"}`}
+            style={{
+              color: paymentType === "PAY_AT_DOOR" ? "white" : "black",
+              marginTop: 5,
+            }}
           >
             Kapıda Öde
           </Text>
         </TouchableOpacity>
       </View>
-      {/* FORM */}
-      <View className={"flex flex-col mt-4"}>
-        <View className={"flex flex-row items-center gap-x-2 justify-between"}>
+
+      <View style={{ marginTop: 20 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
           <FormInput
-              name="buyer.name"
-              placeholderName="Ad"
-              formik={formik}
+            name="buyer.name"
+            placeholderName="Ad"
+            formik={formik}
+            containerStyle={{ flex: 1 }}
           />
           <FormInput
+            name="buyer.surname"
             placeholderName="Soyad"
-            name='buyer.surname'
             formik={formik}
+            containerStyle={{ flex: 1 }}
           />
         </View>
         <FormInput
-          placeholderName="E-mail"
           name="buyer.email"
+          placeholderName="E-mail"
           formik={formik}
         />
         <FormInput
-          keyboardType={"number-pad"}
           name="buyer.gsmNumber"
           placeholderName="Telefon"
           formik={formik}
+          keyboardType="number-pad"
         />
+
         <View
-          className={"flex flex-row items-center gap-x-2 justify-between mb-2"}
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 15,
+          }}
         >
           <View style={{ zIndex: 1000, width: width * 0.45 }}>
             <DropDownPicker
@@ -238,7 +198,6 @@ function PaymentForm() {
                   ...selectedCityState,
                   city: callbackValue(),
                 });
-
                 const selectedCity = ilData.find(
                   (item) => item.name === callbackValue(),
                 );
@@ -248,20 +207,10 @@ function PaymentForm() {
                 label: item.name,
                 value: item.name,
               }))}
-              listMode="MODAL" // veya "MODAL" veya "FLATLIST"
-              mode={"BADGE"}
-              badgeDotColors={[
-                "#e76f51",
-                "#00b4d8",
-                "#e9c46a",
-                "#e76f51",
-                "#8ac926",
-                "#00b4d8",
-                "#e9c46a",
-              ]}
-              zIndex={1000}
-              style={{ backgroundColor: "transparent", borderColor: "gray" }}
-              placeholder={"Şehir Seçiniz"}
+              listMode="MODAL"
+              mode="BADGE"
+              placeholder="Şehir Seçiniz"
+              style={{ borderColor: "gray",backgroundColor:'transparent' }}
             />
           </View>
 
@@ -278,32 +227,34 @@ function PaymentForm() {
                 label: item.name,
                 value: item.name,
               }))}
-              mode={"BADGE"}
-              badgeDotColors={[
-                "#e76f51",
-                "#00b4d8",
-                "#e9c46a",
-                "#e76f51",
-                "#8ac926",
-                "#00b4d8",
-                "#e9c46a",
-              ]}
-              listMode="MODAL" // veya "MODAL" veya "FLATLIST"
-              zIndex={1000}
-              style={{ backgroundColor: "transparent", borderColor: "gray" }}
-              placeholder={"Şehir Seçiniz"}
+              listMode="MODAL"
+              mode="BADGE"
+              placeholder="İlçe Seçiniz"
+              style={{ borderColor: "gray",backgroundColor:'transparent' }}
             />
           </View>
         </View>
+
         <FormInput
-          placeholderName={"Detaylı Adres"}
           name="shippingAddress.address"
+          placeholderName="Detaylı Adres"
           formik={formik}
-          multiline={true}
+          multiline
+          numberOfLines={4}
+        />
+
+        <FormInput
+          name="shippingAddress.address"
+          placeholderName="Detaylı Adres"
+          formik={formik}
+          multiline
           numberOfLines={4}
         />
       </View>
-    </ScrollView>
+      <TouchableOpacity className={"w-full bg-blue-600"}>
+        <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 

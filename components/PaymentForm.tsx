@@ -90,10 +90,8 @@ function PaymentForm() {
     },
   });
 
-  const _handleSubmit = async (values) => {
-    setLoading(true);
-    // İşlem detayları buraya
-    setLoading(false);
+  const _handleSubmit = async () => {
+    console.log(formik.values);
   };
 
   return (
@@ -236,13 +234,12 @@ function PaymentForm() {
         </View>
 
         <FormInput
-          name="shippingAddress.address"
-          placeholderName="Detaylı Adres"
-          formik={formik}
-          multiline
-          numberOfLines={4}
+            name="shippingAddress.street"
+            placeholderName="Mahalle/Cadde"
+            formik={formik}
+            multiline
+            numberOfLines={4}
         />
-
         <FormInput
           name="shippingAddress.address"
           placeholderName="Detaylı Adres"
@@ -250,8 +247,25 @@ function PaymentForm() {
           multiline
           numberOfLines={4}
         />
+
+        {
+          paymentType === 'CREDIT_CARD' && (
+                <View className={'flex flex-col rounded-lg p-2'} style={{backgroundColor:'#e5e7eb',marginBottom:20}}>
+                  <Text className={'text-xl font-bold text-center'}>Kart Bilgileri</Text>
+                  <FormInput name="paymentCard.cardHolderName" formik={formik} placeholderName="Kart Sahibi" />
+                  <FormInput name="paymentCard.cardNumber" formik={formik} placeholderName="Kart Numarası" />
+                  <View className={'flex flex-row items-center gap-x-2 justify-between'}>
+                    <FormInput name="paymentCard.expireMonth" formik={formik} placeholderName="Ay" containerStyle={{ flex: 1 }} />
+                    <FormInput name="paymentCard.expireYear" formik={formik} placeholderName="Yıl" containerStyle={{ flex: 1 }} />
+                    <FormInput name="paymentCard.cvc" formik={formik} placeholderName="CVC" containerStyle={{ flex: 1 }} />
+                  </View>
+                  <Image source={require('../assets/icons/iyzicoImages.png')} style={{width:'100%', height:25}}/>
+                </View>
+            )
+        }
+
       </View>
-      <TouchableOpacity className={"w-full bg-blue-600"}>
+      <TouchableOpacity onPress={_handleSubmit} style={{marginBottom:40}} className={"w-full bg-purple-500 flex items-center justify-center rounded-lg py-4 p-2"}>
         <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
       </TouchableOpacity>
     </View>

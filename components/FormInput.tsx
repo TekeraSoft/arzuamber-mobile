@@ -1,29 +1,88 @@
 import React from "react";
-import { Text, TextInput, View, StyleSheet } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import { getIn } from "formik";
 
-function FormInput({ formik, name, placeholderName, containerStyle = {}, keyboardType, ...rest }) {
+function FormInput({
+  formik,
+  name,
+    inputType,
+  placeholderName,
+  containerStyle = {},
+  keyboardType,
+  ...rest
+}) {
   const value = getIn(formik?.values, name);
   const error = getIn(formik?.errors, name);
   const touched = getIn(formik?.touched, name);
 
+  const formatCardNumber = (text) => {
+    const cleaned = text.replace(/\D/g, "").slice(0, 16);
+    return cleaned.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const formatExpiry = (text) => {
+    const cleaned = text.replace(/\D/g, "").slice(0, 4);
+    if (cleaned.length < 3) {
+      return text.replace(/\D/g, "").slice(0, 4);
+    } else {
+     return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+  };
+
+  const formatCVC = (text) => {
+    return text.replace(/\D/g, "").slice(0, 4)
+  };
+
   return (
-      <View style={[styles.container, containerStyle]}>
-        <Text style={styles.label}>{placeholderName}</Text>
-        <TextInput
-            {...rest}
-            value={typeof value === "string" ? value : ""}
-            style={[
-              styles.input,
-              name === "shippingAddress.address" && styles.areaInput,
-              touched && error ? styles.inputError : {},
-            ]}
-            onChangeText={(e) => formik.setFieldValue(name, e)}
-            onBlur={() => formik.setFieldTouched(name)}
-            keyboardType={keyboardType}
-        />
-        {touched && error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
+    <View style={[styles.container, containerStyle]}>
+      <Text style={styles.label}>{placeholderName}</Text>
+      {
+        inputType === 'creditCardNumber' && (
+            <TextInput
+                {...rest}
+                value={typeof value === "string" ? value : ""}
+                style={[
+                  styles.input,
+                  name === "shippingAddress.address" && styles.areaInput,
+                  touched && error ? styles.inputError : {},
+                ]}
+                onChangeText={(e) =>formik.setFieldValue(name,formatCardNumber(e))
+                }
+                onBlur={() => formik.setFieldTouched(name)}
+                keyboardType={keyboardType}
+            />
+        ) || inputType === 'cvc' && (
+            <TextInput
+                {...rest}
+                value={typeof value === "string" ? value : ""}
+                style={[
+                  styles.input,
+                  name === "shippingAddress.address" && styles.areaInput,
+                  touched && error ? styles.inputError : {},
+                ]}
+                onChangeText={(e) =>formik.setFieldValue(name,formatCVC(e))
+                }
+                onBlur={() => formik.setFieldTouched(name)}
+                keyboardType={keyboardType}
+            />
+        ) || (
+              <TextInput
+                  {...rest}
+                  value={typeof value === "string" ? value : ""}
+                  style={[
+                    styles.input,
+                    name === "shippingAddress.address" && styles.areaInput,
+                    touched && error ? styles.inputError : {},
+                  ]}
+                  onChangeText={(e) =>formik.setFieldValue(name,e)
+                  }
+                  onBlur={() => formik.setFieldTouched(name)}
+                  keyboardType={keyboardType}
+              />
+          )
+      }
+      {touched && error && <Text style={styles.errorText}>{error}</Text>}
+    </View>
   );
 }
 

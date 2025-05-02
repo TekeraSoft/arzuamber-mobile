@@ -1,17 +1,11 @@
 // Düzenlenmiş PaymentForm.js
-import React, { useState, useRef } from "react";
+import React, {useState, useRef, useEffect} from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   View,
   Text,
   TouchableOpacity,
   Image,
   Dimensions,
-  Keyboard,
-  TouchableWithoutFeedback,
-  SafeAreaView, findNodeHandle,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -25,7 +19,8 @@ import FormInput from "@/components/FormInput";
 import ilData from "../data/il.json";
 import stateData from "../data/ilce.json";
 import DropDownPicker from "react-native-dropdown-picker";
-import KeyboardAvoidingContainer from "@/components/KeyboardAvoidingContainer";
+import CustomCheckbox from "@/components/utils/CheckboxComponent";
+import {useOrderValidationSchema} from "@/error/orderErrorSchema";
 
 const { width } = Dimensions.get("window");
 
@@ -39,15 +34,126 @@ function PaymentForm() {
   const router = useRouter();
   const [openCityDropdown, setOpenCityDropdown] = useState(false);
   const [openStateDropdown, setOpenStateDropdown] = useState(false);
+  const [openBillingAddressDropdownCity, setOpenBillingAddressDropdownCity] = useState(false);
+  const [openBillingAddressDropdownState, setOpenBillingAddressDropdownState] = useState(false);
   const [state, setState] = useState([]);
+  const [billingState, setBillingState] = useState([]);
   const [selectedCityState, setSelectedCityState] = useState({
     city: "",
     state: "",
   });
+  const [selectedBillingCityState, setSelectedBillingCityState] = useState({
+    city: "",
+    state: "",
+  });
+  const [expiry,setExpiry] = useState('');
+  const [checked, setChecked] = useState(false);
+  const [threeDsModal, setThreeDsModal] = useState(false);
+  const [ip,setIp] = useState();
+
+  const toggleCheckbox = () => setChecked(!checked);
 
   const handleSelectState = (il_id) => {
     const ilce = stateData.filter((s) => s.il_id === il_id);
     setState(ilce);
+  };
+
+  const handleSelectBillingState = (il_id) => {
+    const ilce = stateData.filter((s) => s.il_id === il_id);
+    setBillingState(ilce);
+  };
+
+  const validationSchema = useOrderValidationSchema(
+      openBillingAddress,
+      paymentType
+  );
+
+  useEffect(() => {
+    fetch("https://api.ipify.org?format=json")
+        .then((response) => response.json())
+        .then((data) => setIp(data.ip))
+        .catch((err) => console.error("IP alınamadı", err));
+  }, []);
+
+  const _handleSubmit = async (values) => {
+    setLoading(true);
+    if (paymentType === "CREDIT_CARD") {
+      await axios
+          .post(`${process.env.NEXT_PUBLIC_BACKEND_API}/order/pay`, {
+            ...values,
+            shippingAddress: {
+              ...values.shippingAddress,
+              contactName: values.buyer.name,
+            },
+            billingAddress: openBillingAddress
+                ? { ...values.billingAddress, contactName: values.buyer.name }
+                : { ...values.shippingAddress, contactName: values.buyer.name },
+            buyer: {
+              ...values.buyer,
+              ip: ip,
+              registrationAddress: values.shippingAddress.address,
+              city: values.shippingAddress.city,
+              country: values.shippingAddress.country,
+            },
+            ...(paymentType === "CREDIT_CARD" && {
+              paymentCard: {
+                ...values.paymentCard,
+                cardNumber: values.paymentCard.cardNumber.replace(/\D/g, ""),
+              },
+            }),
+            basketItems: basketItems,
+            shippingPrice:
+                total > filterData.maxShippingPrice ? 0 : filterData.shippingPrice,
+          })
+          .then((res) => {
+            if (res.data.status === "success") {
+              setLoading(false);
+              setThreeDsModal(res.data.htmlContent);
+              // sendWhatsappMessage(values.buyer.gsmNumber, basketItems);
+            } else {
+              Toast.show({type:'error',text1:res.data.errorMessage});
+            }
+          })
+          .catch((err) => {
+            setLoading(false);
+            Toast.show({type:'error',text1:err.response.data});
+          })
+          .finally(() => setLoading(false));
+    } else {
+      // @ts-ignore
+      dispatch(
+          createPayAtDoor(
+              {
+                shippingAddress: {
+                  ...values.shippingAddress,
+                  contactName: values.buyer.name,
+                },
+                billingAddress: openBillingAddress
+                    ? {
+                      ...values.billingAddress,
+                      contactName: values.buyer.name,
+                    }
+                    : {
+                      ...values.shippingAddress,
+                      contactName: values.buyer.name,
+                    },
+                buyer: {
+                  ...values.buyer,
+                  ip: ip,
+                  registrationAddress: values.shippingAddress.address,
+                  city: values.shippingAddress.city,
+                  country: values.shippingAddress.country,
+                },
+                basketItems: basketItems,
+                shippingPrice:
+                    total > filterData.maxShippingPrice
+                        ? 0
+                        : filterData.shippingPrice,
+              },
+              router
+          )
+      );
+    }
   };
 
   // @ts-ignore
@@ -88,14 +194,12 @@ function PaymentForm() {
         zipCode: "",
       },
     },
+    validationSchema: validationSchema,
+    onSubmit: _handleSubmit
   });
 
-  const _handleSubmit = async () => {
-    console.log(formik.values);
-  };
-
   return (
-    <View style={{paddingHorizontal:10}}>
+    <View style={{ paddingHorizontal: 10 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
         <TouchableOpacity
           onPress={() => setPaymentType("CREDIT_CARD")}
@@ -196,6 +300,7 @@ function PaymentForm() {
                   ...selectedCityState,
                   city: callbackValue(),
                 });
+                formik.setFieldValue('shippingAddress.city', callbackValue());
                 const selectedCity = ilData.find(
                   (item) => item.name === callbackValue(),
                 );
@@ -208,7 +313,7 @@ function PaymentForm() {
               listMode="MODAL"
               mode="BADGE"
               placeholder="Şehir Seçiniz"
-              style={{ borderColor: "gray",backgroundColor:'transparent' }}
+              style={{ borderColor: "gray", backgroundColor: "transparent" }}
             />
           </View>
 
@@ -228,17 +333,17 @@ function PaymentForm() {
               listMode="MODAL"
               mode="BADGE"
               placeholder="İlçe Seçiniz"
-              style={{ borderColor: "gray",backgroundColor:'transparent' }}
+              style={{ borderColor: "gray", backgroundColor: "transparent" }}
             />
           </View>
         </View>
 
         <FormInput
-            name="shippingAddress.street"
-            placeholderName="Mahalle/Cadde"
-            formik={formik}
-            multiline
-            numberOfLines={4}
+          name="shippingAddress.street"
+          placeholderName="Mahalle/Cadde"
+          formik={formik}
+          multiline
+          numberOfLines={4}
         />
         <FormInput
           name="shippingAddress.address"
@@ -248,24 +353,156 @@ function PaymentForm() {
           numberOfLines={4}
         />
 
-        {
-          paymentType === 'CREDIT_CARD' && (
-                <View className={'flex flex-col rounded-lg p-2'} style={{backgroundColor:'#e5e7eb',marginBottom:20}}>
-                  <Text className={'text-xl font-bold text-center'}>Kart Bilgileri</Text>
-                  <FormInput name="paymentCard.cardHolderName" formik={formik} placeholderName="Kart Sahibi" />
-                  <FormInput name="paymentCard.cardNumber" formik={formik} placeholderName="Kart Numarası" />
-                  <View className={'flex flex-row items-center gap-x-2 justify-between'}>
-                    <FormInput name="paymentCard.expireMonth" formik={formik} placeholderName="Ay" containerStyle={{ flex: 1 }} />
-                    <FormInput name="paymentCard.expireYear" formik={formik} placeholderName="Yıl" containerStyle={{ flex: 1 }} />
-                    <FormInput name="paymentCard.cvc" formik={formik} placeholderName="CVC" containerStyle={{ flex: 1 }} />
-                  </View>
-                  <Image source={require('../assets/icons/iyzicoImages.png')} style={{width:'100%', height:25}}/>
+        <View>
+          <CustomCheckbox
+            label={"Fatura Adresim Farklı"}
+            checked={checked}
+            toggleCheckbox={toggleCheckbox}
+          />
+          {checked && (
+            <View className={"bg-gray-400 p-2 rounded-lg"}>
+              <Text className={"text-lg font-semibold"}>Fatura Adresim</Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 15,
+                }}
+              >
+                <View style={{ zIndex: 1000, width: width * 0.45 }}>
+                  <DropDownPicker
+                    open={openBillingAddressDropdownCity}
+                    value={selectedBillingCityState.city}
+                    setOpen={setOpenBillingAddressDropdownCity}
+                    setValue={(callbackValue) => {
+                      setSelectedBillingCityState({
+                        ...selectedBillingCityState,
+                        city: callbackValue(),
+                      });
+                      const selectedCity = ilData.find(
+                        (item) => item.name === callbackValue(),
+                      );
+                      handleSelectBillingState(selectedCity?.id);
+                    }}
+                    items={ilData.map((item) => ({
+                      label: item.name,
+                      value: item.name,
+                    }))}
+                    listMode="MODAL"
+                    mode="BADGE"
+                    placeholder="Şehir Seçiniz"
+                    style={{
+                      borderColor: "gray",
+                      backgroundColor: "transparent",
+                    }}
+                  />
                 </View>
-            )
-        }
 
+                <View style={{ zIndex: 1000, width: width * 0.45 }}>
+                  <DropDownPicker
+                    disabled={billingState.length === 0}
+                    open={openBillingAddressDropdownState}
+                    value={formik.values.billingAddress.state}
+                    setOpen={setOpenBillingAddressDropdownState}
+                    setValue={(val) =>
+                      formik.setFieldValue("billingAddress.state", val())
+                    }
+                    items={billingState.map((item) => ({
+                      label: item.name,
+                      value: item.name,
+                    }))}
+                    listMode="MODAL"
+                    mode="BADGE"
+                    placeholder="İlçe Seçiniz"
+                    style={{
+                      borderColor: "gray",
+                      backgroundColor: "transparent",
+                    }}
+                  />
+                </View>
+              </View>
+
+              <FormInput
+                name="billingAddress.street"
+                placeholderName="Mahalle/Cadde"
+                formik={formik}
+                multiline
+                numberOfLines={4}
+              />
+              <FormInput
+                name="billingAddress.address"
+                placeholderName="Detaylı Adres"
+                formik={formik}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+          )}
+        </View>
+
+        {paymentType === "CREDIT_CARD" && (
+          <View
+            className={"flex flex-col rounded-lg p-2"}
+            style={{ backgroundColor: "#e5e7eb", marginBottom: 20 }}
+          >
+            <Text className={"text-xl font-bold text-center"}>
+              Kart Bilgileri
+            </Text>
+            <FormInput
+              name="paymentCard.cardHolderName"
+              formik={formik}
+              placeholderName="Kart Sahibi"
+            />
+            <FormInput
+              name="paymentCard.cardNumber"
+              formik={formik}
+              placeholderName="Kart Numarası"
+              inputType={'creditCardNumber'}
+              keyboardType={'number-pad'}
+            />
+            <View
+              className={"flex flex-row items-center gap-x-2 justify-between"}
+            >
+              <FormInput
+                name="paymentCard.expireMonth"
+                formik={formik}
+                placeholderName="Ay"
+                containerStyle={{ flex: 1 }}
+                keyboardType={'number-pad'}
+                maxLength={2}
+              />
+              <FormInput
+                  name="paymentCard.expireYear"
+                  formik={formik}
+                  placeholderName="Yıl"
+                  containerStyle={{ flex: 1 }}
+                  keyboardType={'number-pad'}
+                  maxLength={2}
+              />
+              <FormInput
+                name="paymentCard.cvc"
+                formik={formik}
+                placeholderName="CVC"
+                containerStyle={{ flex: 1 }}
+                inputType={'cvc'}
+                keyboardType={'number-pad'}
+                maxLength={4}
+              />
+            </View>
+            <Image
+              source={require("../assets/icons/iyzicoImages.png")}
+              style={{ width: "100%", height: 25 }}
+            />
+          </View>
+        )}
       </View>
-      <TouchableOpacity onPress={_handleSubmit} style={{marginBottom:40}} className={"w-full bg-purple-500 flex items-center justify-center rounded-lg py-4 p-2"}>
+      <TouchableOpacity
+        onPress={()=> formik.handleSubmit()}
+        style={{ marginBottom: 40 }}
+        className={
+          "w-full bg-purple-500 flex items-center justify-center rounded-lg py-4 p-2"
+        }
+      >
         <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
       </TouchableOpacity>
     </View>

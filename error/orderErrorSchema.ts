@@ -1,8 +1,6 @@
 import * as yup from "yup";
-import { useTranslations } from "next-intl";
 
 export const useOrderValidationSchema = (openBillingAddress, paymentType) => {
-    const t = useTranslations();
 
     return yup.object().shape({
         ...(paymentType === "CREDIT_CARD"
@@ -10,52 +8,52 @@ export const useOrderValidationSchema = (openBillingAddress, paymentType) => {
                 paymentCard: yup.object().shape({
                     cardHolderName: yup
                         .string()
-                        .required(t("paymentForm.paymentCard.cardHolderName")),
+                        .required(),
                     cardNumber: yup
                         .string()
-                        .required(t("paymentForm.paymentCard.cardNumber")),
+                        .required(),
                     expireMonth: yup
                         .string()
-                        .required(t("paymentForm.paymentCard.expireMonth.required")),
+                        .required(),
                     expireYear: yup
                         .string()
-                        .required(t("paymentForm.paymentCard.expireYear.required")),
+                        .required(),
                     cvc: yup
                         .string()
-                        .required(t("paymentForm.paymentCard.cvcRequired")),
+                        .required(),
                 }),
             }
             : {}),
         buyer: yup.object({
-            name: yup.string().required(t("paymentForm.buyer.name")),
-            surname: yup.string().required(t("paymentForm.buyer.surname")),
-            gsmNumber: yup.string().required(t("paymentForm.buyer.gsmNumber")),
+            name: yup.string().required(),
+            surname: yup.string().required(),
+            gsmNumber: yup.string().required(),
             email: yup
                 .string()
-                .email(t("paymentForm.buyer.email.email"))
-                .required(t("paymentForm.buyer.email.required")),
+                .email()
+                .required(),
         }),
         shippingAddress: yup.object({
-            city: yup.string().required(t("paymentForm.shippingAddress.city")),
-            state: yup.string().required(t("paymentForm.shippingAddress.district")),
-            address: yup.string().required(t("paymentForm.shippingAddress.address")),
+            city: yup.string().required(),
+            state: yup.string().required(),
+            address: yup.string().required(),
             street: yup
                 .string()
-                .required(t("paymentForm.shippingAddress.Neighbourhood")),
+                .required(),
         }),
         ...(openBillingAddress
             ? {
                 billingAddress: yup.object({
-                    city: yup.string().required(t("paymentForm.shippingAddress.city")),
+                    city: yup.string().required(),
                     state: yup
                         .string()
-                        .required(t("paymentForm.shippingAddress.district")),
+                        .required(),
                     address: yup
                         .string()
-                        .required(t("paymentForm.shippingAddress.address")),
+                        .required(),
                     street: yup
                         .string()
-                        .required(t("paymentForm.shippingAddress.Neighbourhood")),
+                        .required(),
                 }),
             }
             : {}),

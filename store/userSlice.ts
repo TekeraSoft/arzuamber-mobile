@@ -83,5 +83,17 @@ export const editUserDetailsDispatch = (values: object,resetForm) => async (disp
   })
 }
 
+export const createContactDispatch = (values: object, resetForm) => async (dispatch) => {
+  dispatch(loading(true));
+  postGuardRequest({controller:'contact'},values).then((res)=> {
+    dispatch(loading(false));
+    resetForm()
+    Toast.show({type: "success", text1:res.data.message});
+  }).catch(err=> {
+    dispatch(loading(false));
+    Toast.show({type: "error", text1:err.response.data});
+  })
+}
+
 export const { getOrders, loading } = userSlice.actions;
 export default userSlice.reducer;

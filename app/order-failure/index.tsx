@@ -1,12 +1,12 @@
 import React from 'react';
 import {Text, View} from 'react-native';
 
-function Fav() {
+function OrderFailure() {
     return (
         <View>
-            <Text>Fav</Text>
+            <Text>OrderFailure</Text>
         </View>
     );
 }
 
-export default Fav;
+export default OrderFailure;

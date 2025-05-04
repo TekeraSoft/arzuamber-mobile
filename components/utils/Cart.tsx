@@ -16,7 +16,7 @@ import { rehydrateCart, removeFromCartAsync } from "@/store/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { color } from "@/constants/colors";
-import { Link } from "expo-router";
+import {Link, useRouter} from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const { width, height } = Dimensions.get("window");
@@ -25,7 +25,7 @@ function Cart({props}) {
   const dispatch = useDispatch();
   const { cartProducts, total } = useSelector((state: RootState) => state.cart);
   const { openCartModal } = useSelector((state: RootState) => state.general);
-
+  const router = useRouter()
     const [scale] = useState(new Animated.Value(0)); // Başlangıçta badge büyüklüğü 0
 
     useEffect(() => {
@@ -53,7 +53,8 @@ function Cart({props}) {
 
   return (
     <TouchableOpacity
-      onPress={() => cartProducts.length > 0 && dispatch(handleOpenCartModal())}
+        //onPress={() => cartProducts.length > 0 && dispatch(handleOpenCartModal())}
+        onPress={() => router.push('order-success')}
       className={"gap-x-8 mr-3 relative"}
     >
         <MaterialCommunityIcons

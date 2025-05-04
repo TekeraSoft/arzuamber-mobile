@@ -1,11 +1,11 @@
 // Düzenlenmiş PaymentForm.js
 import React, {useState, useRef, useEffect} from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Dimensions,
+    View,
+    Text,
+    TouchableOpacity,
+    Image,
+    Dimensions, Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -21,12 +21,15 @@ import stateData from "../data/ilce.json";
 import DropDownPicker from "react-native-dropdown-picker";
 import CustomCheckbox from "@/components/utils/CheckboxComponent";
 import {useOrderValidationSchema} from "@/error/orderErrorSchema";
+import {BACKEND_API} from "@/config";
+import ThreeDSModal from "@/components/ThreeDSModal";
 
 const { width } = Dimensions.get("window");
 
 function PaymentForm() {
   const dispatch = useDispatch<AppDispatch>();
   const { total } = useSelector((state: RootState) => state.cart);
+  const {cartProducts} = useSelector((state:RootState) => state.cart)
   const [paymentType, setPaymentType] = useState("CREDIT_CARD");
   const [loading, setLoading] = useState(false);
   const [openBillingAddress, setOpenBillingAddress] = useState(false);
@@ -50,6 +53,10 @@ function PaymentForm() {
   const [checked, setChecked] = useState(false);
   const [threeDsModal, setThreeDsModal] = useState(false);
   const [ip,setIp] = useState();
+    const [showModal, setShowModal] = useState(false);
+    const [threeDsHtml, setThreeDsHtml] = useState("");
+
+  const navigation = useRouter();
 
   const toggleCheckbox = () => setChecked(!checked);
 
@@ -75,11 +82,55 @@ function PaymentForm() {
         .catch((err) => console.error("IP alınamadı", err));
   }, []);
 
+    useEffect(() => {
+        const basketItems = cartProducts.map((cp) => ({
+            id: cp.id,
+            name: cp.name,
+            category1: cp.category1,
+            category2: cp.category2,
+            price: cp.price,
+            quantity: cp.quantity,
+            size: cp.size,
+            stockSizeId: cp.stockSizeId,
+            stockCode: cp.stockCode,
+            color: cp.color,
+            image: cp.image,
+        }));
+        setBasketItems(basketItems);
+    }, [cartProducts]);
+
   const _handleSubmit = async (values) => {
+      console.log({
+                  ...values,
+                  shippingAddress: {
+                    ...values.shippingAddress,
+                    contactName: values.buyer.name,
+                  },
+                  billingAddress: openBillingAddress
+                      ? { ...values.billingAddress, contactName: values.buyer.name }
+                      : { ...values.shippingAddress, contactName: values.buyer.name },
+                  buyer: {
+                    ...values.buyer,
+                    ip: ip,
+                    registrationAddress: values.shippingAddress.address,
+                    city: values.shippingAddress.city,
+                    country: values.shippingAddress.country,
+                  },
+                  ...(paymentType === "CREDIT_CARD" && {
+                    paymentCard: {
+                      ...values.paymentCard,
+                      cardNumber: values.paymentCard.cardNumber.replace(/\D/g, ""),
+                    },
+                  }),
+                  basketItems: basketItems,
+                  shippingPrice:
+                      total > filterData.maxShippingPrice ? 0 : filterData.shippingPrice,
+                }
+      )
     setLoading(true);
     if (paymentType === "CREDIT_CARD") {
       await axios
-          .post(`${process.env.NEXT_PUBLIC_BACKEND_API}/order/pay`, {
+          .post(`${BACKEND_API}/order/pay`, {
             ...values,
             shippingAddress: {
               ...values.shippingAddress,
@@ -106,13 +157,10 @@ function PaymentForm() {
                 total > filterData.maxShippingPrice ? 0 : filterData.shippingPrice,
           })
           .then((res) => {
-            if (res.data.status === "success") {
-              setLoading(false);
-              setThreeDsModal(res.data.htmlContent);
-              // sendWhatsappMessage(values.buyer.gsmNumber, basketItems);
-            } else {
-              Toast.show({type:'error',text1:res.data.errorMessage});
-            }
+              if (res.data.status === "success") {
+                  setThreeDsHtml(res.data.htmlContent);
+                  setShowModal(true);
+              }
           })
           .catch((err) => {
             setLoading(false);
@@ -505,6 +553,14 @@ function PaymentForm() {
       >
         <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
       </TouchableOpacity>
+
+        <ThreeDSModal
+            visible={showModal}
+            htmlContent={threeDsHtml}
+            onClose={() => setShowModal(false)}
+            onSuccess={() => Alert.alert('Ödeme başarılı')}
+            onFailure={() => Alert.alert('Ödeme başarısız')}
+        />
     </View>
   );
 }

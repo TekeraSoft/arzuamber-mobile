@@ -60,6 +60,32 @@ export default function RootLayout() {
                     )
                 }} />
 
+                <Stack.Screen name="order-success/index" options={{
+                    headerTitle:'Sepetiniz',
+                    headerBackTitle: "",
+                    headerTitleAlign:'center',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                    headerLeft:() => (
+                        <TouchableOpacity className={'border-white border p-1.5 rounded-lg'} onPress={()=> router.navigate('/')}>
+                            <Text className={'text-white'}>Anasayfaya Dön</Text>
+                        </TouchableOpacity>
+                    )
+                }} />
+
+                <Stack.Screen name="order-failure/index" options={{
+                    headerTitle:'Sepetiniz',
+                    headerBackTitle: "",
+                    headerTitleAlign:'center',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                    headerLeft:() => (
+                        <TouchableOpacity onPress={()=> navigation.goBack()}>
+                            <Ionicons name="chevron-back-outline" size={32} color="white" />
+                        </TouchableOpacity>
+                    )
+                }} />
+
                 <Stack.Screen name="payment/index" options={{
                     headerTitle:'Sepetiniz',
                     headerBackTitle: "",

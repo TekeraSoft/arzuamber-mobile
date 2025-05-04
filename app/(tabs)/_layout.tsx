@@ -3,7 +3,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Tabs } from "expo-router";
+import {Tabs, useRouter} from "expo-router";
 import {
   Feather,
   FontAwesome6,
@@ -18,6 +18,7 @@ import Cart from "@/components/utils/Cart";
 
 export default function TabLayout() {
   const { t }: { t: (type: string) => string } = useTranslation();
+  const router = useRouter();
 
   const viewStyle = (props) => {
     return {
@@ -115,15 +116,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="fav"
+        name="contact"
         options={{
           tabBarIcon: (props) => (
             <View style={viewStyle(props)}>
-              <Feather
-                name="heart"
-                size={28}
-                color={'white'}
-              />
+                <FontAwesome6 name="contact-book" size={28} color="white" />
             </View>
           ),
         }}

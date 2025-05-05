@@ -1,13 +1,21 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import {Platform, Text, View} from 'react-native';
 import MapScreen from "@/components/Map";
 import {Entypo, Feather} from "@expo/vector-icons";
 import {color} from "@/constants/colors";
 import ContactForm from "@/components/ContactForm";
+import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 function Contact() {
     return (
-      <View style={{ flex: 1, marginHorizontal: 5 }}>
+        <KeyboardAwareScrollView
+            enableOnAndroid
+            keyboardOpeningTime={3}
+            keyboardVerticalOffset={Platform.OS === 'android' ? 60 : 80}
+            extraScrollHeight={100}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }}
+        >
         <MapScreen />
 
           <View className={'flex flex-col gap-y-4 mx-4'}>
@@ -33,7 +41,7 @@ function Contact() {
              </View>
           </View>
           <ContactForm />
-      </View>
+        </KeyboardAwareScrollView>
     );
 }
 

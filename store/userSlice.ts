@@ -95,5 +95,27 @@ export const createContactDispatch = (values: object, resetForm) => async (dispa
   })
 }
 
+export const addFavoritesDispatch =
+    (userId: string, productId: string) => async (dispatch) => {
+      dispatch(loading(true));
+      getGuardRequest({
+        controller: "user",
+        action: "add-favorite-product",
+        params: { userId: userId, productId: productId },
+      })
+          .then((res) => {
+            dispatch(loading(false));
+            if (!res.data.success) {
+              Toast.show({type:'error',text1:res.data?.message})
+            } else {
+              Toast.show({type: "success", text1:res.data?.message});
+            }
+          })
+          .catch((err) => {
+            dispatch(loading(false));
+            console.log(err);
+          });
+    };
+
 export const { getOrders, loading } = userSlice.actions;
 export default userSlice.reducer;

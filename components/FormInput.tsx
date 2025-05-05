@@ -44,6 +44,7 @@ function FormInput({
                 style={[
                   styles.input,
                   name === "shippingAddress.address" && styles.areaInput,
+                  name === "message" && styles.areaInput,
                   touched && error ? styles.inputError : {},
                 ]}
                 onChangeText={(e) =>formik.setFieldValue(name,formatCardNumber(e))
@@ -58,6 +59,7 @@ function FormInput({
                 style={[
                   styles.input,
                   name === "shippingAddress.address" && styles.areaInput,
+                  name === "message" && styles.areaInput,
                   touched && error ? styles.inputError : {},
                 ]}
                 onChangeText={(e) =>formik.setFieldValue(name,formatCVC(e))
@@ -72,6 +74,7 @@ function FormInput({
                   style={[
                     styles.input,
                     name === "shippingAddress.address" && styles.areaInput,
+                    name === "message" && styles.areaInput,
                     touched && error ? styles.inputError : {},
                   ]}
                   onChangeText={(e) =>formik.setFieldValue(name,e)
@@ -90,7 +93,7 @@ export default FormInput;
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 15,
+    marginBottom: 10,
     // Flex ayarı yapılacak
   },
   label: {

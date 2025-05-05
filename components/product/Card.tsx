@@ -2,6 +2,8 @@ import React from 'react';
 import {Dimensions, Image, Text, TouchableOpacity, View} from 'react-native';
 import {router} from "expo-router";
 import {RESOURCE_API} from "@/config";
+import {AntDesign} from "@expo/vector-icons";
+import {color} from "@/constants/colors";
 
 const {width, height} = Dimensions.get('window');
 const cardMargin = 16; // toplam sağ/sol margin (8px + 8px)
@@ -16,6 +18,7 @@ function Card({product}) {
             style={{
                 width: cardWidth,
                 backgroundColor: 'white',
+                zIndex:-1
             }}
         >
             <Image
@@ -23,6 +26,26 @@ function Card({product}) {
                 style={{ width: '100%', height: height * 0.36, borderRadius: 8 }}
                 resizeMode="cover"
             />
+            {/* Beğen Butonu */}
+            <TouchableOpacity
+                onPress={() => {
+                    // burada beğeni durumunu güncelle (örnek olarak log yazdık)
+                    console.log('Beğen butonuna tıklandı');
+                }}
+                style={{
+                    position: 'absolute',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    right: 5,
+                    top: 3,
+                    borderRadius: 50,
+                    zIndex: 999,
+                    padding: 8, // dokunma alanını artırmak için
+                }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // hata olmasın diye
+            >
+                <AntDesign name="hearto" size={24} color={color.mainColorDark} />
+            </TouchableOpacity>
             <Text style={{ color: '#4B5563', fontSize: 14, paddingTop: 4, paddingBottom: 8 }}>
                 {product.name.length >= 30 ? `${product.name.slice(0, 40)}...` : product.name}
             </Text>

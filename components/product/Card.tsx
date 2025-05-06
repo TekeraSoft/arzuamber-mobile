@@ -1,6 +1,6 @@
 import React from 'react';
 import {Dimensions, Image, Text, TouchableOpacity, View} from 'react-native';
-import {router} from "expo-router";
+import {router, useNavigation, useRouter} from "expo-router";
 import {RESOURCE_API} from "@/config";
 import {AntDesign} from "@expo/vector-icons";
 import {color} from "@/constants/colors";
@@ -10,10 +10,13 @@ const cardMargin = 16; // toplam sağ/sol margin (8px + 8px)
 const cardWidth = (width / 2) - cardMargin;
 
 function Card({product}) {
+
+    const navigation = useNavigation();
+
     return (
         <TouchableOpacity
             onPress={() => {
-                router.push(`/detail/${product.slug}`);
+                router.push(`detail/${product.slug}`);
             }}
             style={{
                 width: cardWidth,

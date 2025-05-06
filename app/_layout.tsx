@@ -1,47 +1,76 @@
-import {Stack, useLocalSearchParams, useNavigation, useRouter} from "expo-router";
+import {SplashScreen, Stack, useLocalSearchParams, useNavigation, useRouter} from "expo-router";
 import './globals.css'
-import {Provider, useDispatch} from "react-redux";
+import {Provider} from "react-redux";
 import Toast from "react-native-toast-message";
 import {I18nextProvider} from "react-i18next";
 import i18n from "@/i18n";
 import {color} from "@/constants/colors";
-import {StatusBar, Text, TouchableOpacity, View} from "react-native";
-import {Feather, Ionicons} from "@expo/vector-icons";
+import { StatusBar, Text, TouchableOpacity, View} from "react-native";
+import {FontAwesome5, Ionicons} from "@expo/vector-icons";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import React, {useEffect, useState} from "react";
+import {StyleSheet} from "react-native";
 import {store} from "@/store/store";
 import Cart from "@/components/utils/Cart";
 import {toastConfig} from "@/config/toastConfig";
-import {clearCart} from "@/store/cartSlice";
-import * as Font from 'expo-font';
-import Card from "@/components/product/Card";
+import {AuthProvider} from "@/context/AuthContext";
+import {WebView} from "react-native-webview";
+import {Asset} from "expo-asset";
 
 export default function RootLayout() {
-
+    const [isAppReady, setIsAppReady] = useState(false);
     const path = useLocalSearchParams()
     const navigation = useNavigation();
     const router = useRouter();
 
-  return (
+    useEffect(() => {
+        SplashScreen.hide()
+        const timeout = setTimeout(() => {
+            setIsAppReady(true);
+        }, 3000); // 3 saniye splash screen
+
+        return () => clearTimeout(timeout);
+    }, []);
+
+    if (!isAppReady) {
+        // Asset yükleme
+        const gifUri = Asset.fromModule(require('../assets/icons/arzuamber-logo-parlama.gif')).uri;
+
+        return (
+            <View style={styles.container}>
+                <WebView
+                    source={{
+                        html: `
+              <html style="margin:0;padding:0;">
+                <body style="margin:0;padding:0;display:flex;justify-content:center;align-items:center;background:#675B84;height:100vh;">
+                  <img src="${gifUri}" style="width:100%;max-width:100%;height:1000px" />
+                </body>
+              </html>
+            `,
+                    }}
+                    originWhitelist={['*']}
+                    style={styles.webview}
+                />
+            </View>
+        );
+    }
+
+    return (
+      <AuthProvider>
       <GestureHandlerRootView>
       <Provider store={store}>
-          <StatusBar translucent={true} backgroundColor={color.mainColor} />
+          <StatusBar backgroundColor={'transparent'} />
           <I18nextProvider i18n={i18n}>
-            <Stack>
+            <Stack s>
 
                 <Stack.Screen name="(tabs)" options={{headerShown:false}} />
 
                 <Stack.Screen name={"detail/[slug]"} options={{
                     headerTitle:'Ürün Detayı',
-                    headerBackTitleVisible: false,
+                    headerBackButtonDisplayMode: 'minimal',
                     headerTitleAlign:'center',
                     headerTintColor:'white',
                     headerStyle:{backgroundColor: color.mainColor},
-                    headerLeft:(props) => (
-                        <TouchableOpacity onPress={()=> navigation.goBack()}>
-                            <Ionicons name="chevron-back-outline" size={32} color="white" />
-                        </TouchableOpacity>
-                    ),
                     headerRight: (props) => (
                         <Cart />
                     )
@@ -49,20 +78,17 @@ export default function RootLayout() {
 
                 <Stack.Screen name="cart/index" options={{
                     headerTitle:'Sepetiniz',
-                    headerBackTitle: "",
+                    headerBackTitle: " ",
+                    headerBackButtonDisplayMode: 'minimal',
                     headerTitleAlign:'center',
                     headerTintColor:'white',
                     headerStyle:{backgroundColor: color.mainColor},
-                    headerLeft:() => (
-                        <TouchableOpacity onPress={()=> navigation.goBack()}>
-                            <Ionicons name="chevron-back-outline" size={32} color="white" />
-                        </TouchableOpacity>
-                    )
                 }} />
 
                 <Stack.Screen name="order-success/index" options={{
                     headerTitle:'Sepetiniz',
-                    headerBackTitle: "",
+                    headerBackTitle: " ",
+                    headerBackVisible: false,
                     headerTitleAlign:'center',
                     headerTintColor:'white',
                     headerStyle:{backgroundColor: color.mainColor},
@@ -75,25 +101,22 @@ export default function RootLayout() {
 
                 <Stack.Screen name="order-failure/index" options={{
                     headerTitle:'Sepetiniz',
-                    headerBackTitle: "",
+                    headerBackTitle: " ",
                     headerTitleAlign:'center',
+                    headerBackButtonDisplayMode: 'minimal',
                     headerTintColor:'white',
                     headerStyle:{backgroundColor: color.mainColor},
-                    headerLeft:() => (
-                        <TouchableOpacity onPress={()=> navigation.goBack()}>
-                            <Ionicons name="chevron-back-outline" size={32} color="white" />
-                        </TouchableOpacity>
-                    )
                 }} />
 
                 <Stack.Screen name="payment/index" options={{
                     headerTitle:'Sepetiniz',
                     headerBackTitle: "",
+                    headerBackVisible: false,
                     headerTitleAlign:'center',
                     headerTintColor:'white',
                     headerStyle:{backgroundColor: color.mainColor},
                     headerLeft:() => (
-                        <TouchableOpacity onPress={()=> navigation.goBack()}>
+                        <TouchableOpacity onPress={()=> router.back()}>
                             <Ionicons name="chevron-back-outline" size={32} color="white" />
                         </TouchableOpacity>
                     ),
@@ -109,5 +132,16 @@ export default function RootLayout() {
           </I18nextProvider>
       </Provider>
       </GestureHandlerRootView>
+      </AuthProvider>
   )
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    webview: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+});

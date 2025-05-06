@@ -54,7 +54,7 @@ function Cart({props}) {
   return (
     <TouchableOpacity
         //onPress={() => cartProducts.length > 0 && dispatch(handleOpenCartModal())}
-        onPress={() => router.push('order-success')}
+        onPress={() => router.push('cart')}
       className={"gap-x-8 mr-3 relative"}
     >
         <MaterialCommunityIcons

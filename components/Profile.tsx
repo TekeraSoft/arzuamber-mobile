@@ -1,20 +1,10 @@
 import React from 'react';
-import {useAuth} from "@/context/AuthContext";
-import SignIn from "@/components/SignIn";
-import {ActivityIndicator, ScrollView, Text, TouchableOpacity, View} from "react-native";
+import {ScrollView, Text, TouchableOpacity, View} from 'react-native';
 import {color} from "@/constants/colors";
 import {Entypo, Feather, FontAwesome5, MaterialIcons} from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 function Profile() {
-    const {session, user,loading, signOut} = useAuth()
-    if(loading) return (
-        <View style={{flex: 1, justifyContent:'center', alignItems:'center'}}>
-            <ActivityIndicator size='large' color={color.mainColor} />
-        </View>
-    )
-    if (!session) return <SignIn />;
-
     return (
         <View className={'flex-1 bg-white'}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{padding:15}}>
@@ -25,21 +15,14 @@ function Profile() {
                         shadowRadius: 4,
                         elevation: 3
                     }}>
-                        <TouchableOpacity className={'rounded-lg bg-red-600 p-2 absolute right-2 top-1'} onPress={()=> signOut()}>
-                            <Text className={'text-white text-xs'}>Çıkış Yap</Text>
-                        </TouchableOpacity>
                         <View className={'flex flex-row items-center justify-start w-full gap-x-4'}>
                             <View className={'flex justify-center items-center bg-purple-500 rounded-full w-28 h-28'}>
-                                <Text className={'text-white text-[44px] font-bold'}>{user?.nameSurname?.trim()
-                                    .split(' ')
-                                    .map(part => part[0]?.toUpperCase())
-                                    .slice(0, 2)
-                                    .join('')}</Text>
+                                <Text className={'text-white text-[44px] font-bold'}>BD</Text>
                             </View>
                             <View className={'flex flex-col gap-y-1'}>
-                                <Text style={{color: color.mainColorDark}} className={'text-xl font-bold'}>{user?.nameSurname}</Text>
-                                <Text style={{color: color.mainColorDark}} className={'text-sm'}>{user?.email}</Text>
-                                <TouchableOpacity className={'flex items-center justify-center w-32 rounded-lg p-1'} style={{backgroundColor:'blue'}}>
+                                <Text style={{color: color.mainColorDark}} className={'text-xl font-bold'}>Bayramali Durak</Text>
+                                <Text style={{color: color.mainColorDark}} className={'text-sm'}>bdurak3@gmail.com</Text>
+                                <TouchableOpacity className={'flex items-center justify-center rounded-lg p-1'} style={{backgroundColor:'blue'}}>
                                     <Text className={'text-white text-xs'}>Profili Düzenle</Text>
                                 </TouchableOpacity>
                             </View>
@@ -68,29 +51,29 @@ function Profile() {
                     }}>
                         <View className={'flex flex-row gap-x-4 items-center'}>
                             <MaterialCommunityIcons name="card-account-details-outline" size={24} color="black" />
-                            <Text>{user?.nameSurname}</Text>
+                            <Text>Bayramali Durak</Text>
                         </View>
 
                         <View className={'flex flex-row gap-x-4 items-center'}>
                             <MaterialIcons name="email" size={24} color="black" />
-                            <Text>{user?.email}</Text>
+                            <Text>bdurak3@gmail.com</Text>
                         </View>
 
                         <View className={'flex flex-row gap-x-4 items-center'}>
                             <Entypo name="phone" size={24} color="black" />
-                            <Text>{user?.phoneNumber}</Text>
+                            <Text>(530) 088 95 07</Text>
                         </View>
 
                         <View className={'flex flex-row gap-x-4 items-center w-80'}>
                             <Entypo name="address" size={24} color="black" />
-                            <Text style={{fontSize:12}}>{user?.address}</Text>
+                            <Text style={{fontSize:12}}>Kanal Mahallesi 4733 sok. Mehmet Keskin Apt. Kat:3 No:5 KEPEZ/ANTALYA</Text>
                         </View>
                     </View>
                 </View>
 
             </ScrollView>
         </View>
-    )
+    );
 }
 
 export default Profile;

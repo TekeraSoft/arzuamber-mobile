@@ -14,14 +14,8 @@ export const favoritesSlice = createSlice({
     getAllFavoritesDispatch: (state, action) => {
       state.favorites = action.payload;
     },
-    updateFavoritesDispatch: (state, action) => {
-      // Eğer aynı ürün daha önce eklenmişse tekrar ekleme (opsiyonel kontrol)
-      const exists = state.favorites.some(
-        (item) => item.id === action.payload.id
-      );
-      if (!exists) {
-        state.favorites.push(action.payload);
-      }
+    addFavorites: (state, action) => {
+        state.favorites.push(action.payload.product);
     },
     deleteFavorite: (state, action) => {
       state.favorites = state.favorites.filter(
@@ -34,6 +28,27 @@ export const favoritesSlice = createSlice({
   },
 });
 
+export const addFavoritesDispatch =
+    (userId: string, productId: string,product:object) => async (dispatch) => {
+      dispatch(loading(true));
+      getGuardRequest({
+        controller: "user",
+        action: "add-favorite-product",
+        params: { userId: userId, productId: productId },
+      })
+          .then((res) => {
+            dispatch(loading(false));
+            if (!res.data.success) {
+                Toast.show({type: "error", text1:res.data?.message});
+            } else {
+                dispatch(addFavorites({product: product}))
+            }
+          })
+          .catch((err) => {
+            dispatch(loading(false));
+          });
+    };
+
 export const deleteToFav =
   (productId: string, userId: string) => async (dispatch) => {
     dispatch(loading(true));
@@ -43,7 +58,6 @@ export const deleteToFav =
       params: { productId: productId, userId: userId },
     })
       .then((res) => {
-        Toast.show({type:'success',text1: res.data?.message})
         dispatch(deleteFavorite(productId));
         dispatch(loading(false));
       })
@@ -69,7 +83,6 @@ export const getAllFavorites = (userId: string) => async (dispatch) => {
     .catch((err) => {
       dispatch(loading(false));
       Toast.show({type: "error", text1:err.response?.data});
-      console.log(err);
     })
     .finally(() => {
       dispatch(loading(false));
@@ -80,7 +93,7 @@ export const getAllFavorites = (userId: string) => async (dispatch) => {
 export const {
   getAllFavoritesDispatch,
   deleteFavorite,
-  updateFavoritesDispatch,
+  addFavorites,
   loading,
 } = favoritesSlice.actions;
 

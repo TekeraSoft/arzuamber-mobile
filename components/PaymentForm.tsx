@@ -5,7 +5,7 @@ import {
     Text,
     TouchableOpacity,
     Image,
-    Dimensions, Alert,
+    Dimensions, Alert, ActivityIndicator,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
@@ -100,33 +100,6 @@ function PaymentForm() {
     }, [cartProducts]);
 
   const _handleSubmit = async (values) => {
-      console.log({
-                  ...values,
-                  shippingAddress: {
-                    ...values.shippingAddress,
-                    contactName: values.buyer.name,
-                  },
-                  billingAddress: openBillingAddress
-                      ? { ...values.billingAddress, contactName: values.buyer.name }
-                      : { ...values.shippingAddress, contactName: values.buyer.name },
-                  buyer: {
-                    ...values.buyer,
-                    ip: ip,
-                    registrationAddress: values.shippingAddress.address,
-                    city: values.shippingAddress.city,
-                    country: values.shippingAddress.country,
-                  },
-                  ...(paymentType === "CREDIT_CARD" && {
-                    paymentCard: {
-                      ...values.paymentCard,
-                      cardNumber: values.paymentCard.cardNumber.replace(/\D/g, ""),
-                    },
-                  }),
-                  basketItems: basketItems,
-                  shippingPrice:
-                      total > filterData.maxShippingPrice ? 0 : filterData.shippingPrice,
-                }
-      )
     setLoading(true);
     if (paymentType === "CREDIT_CARD") {
       await axios
@@ -160,6 +133,8 @@ function PaymentForm() {
               if (res.data.status === "success") {
                   setThreeDsHtml(res.data.htmlContent);
                   setShowModal(true);
+              } else {
+                  Toast.show({type:'error',text1:res.data.errorMessage})
               }
           })
           .catch((err) => {
@@ -546,19 +521,25 @@ function PaymentForm() {
       </View>
       <TouchableOpacity
         onPress={()=> formik.handleSubmit()}
+        disabled={loading}
         style={{ marginBottom: 40 }}
         className={
           "w-full bg-purple-500 flex items-center justify-center rounded-lg py-4 p-2"
         }
       >
-        <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
+          {
+              loading ? <ActivityIndicator color={'white'} /> : <Text className={"text-white font-bold"}>Alışverişi Tamamla</Text>
+          }
       </TouchableOpacity>
 
         <ThreeDSModal
             visible={showModal}
             htmlContent={threeDsHtml}
             onClose={() => setShowModal(false)}
-            onSuccess={() => Alert.alert('Ödeme başarılı')}
+            onSuccess={() => {
+                router.push('payment-success')
+                Alert.alert('Ödeme başarılı')
+            }}
             onFailure={() => Alert.alert('Ödeme başarısız')}
         />
     </View>

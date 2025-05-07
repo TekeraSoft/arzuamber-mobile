@@ -7,6 +7,7 @@ export interface CartState {
   homeSliderImages: [];
   loading: boolean;
   openCartModal: boolean;
+  authModal: boolean;
 }
 
 // Başlangıç durumu (initialState)
@@ -14,6 +15,7 @@ const initialState: CartState = {
   homeSliderImages: [],
   loading: false,
   openCartModal: false,
+  authModal: false,
 };
 
 export const generalSlice = createSlice({
@@ -22,6 +24,9 @@ export const generalSlice = createSlice({
   reducers: {
     getHomeSliders: (state, action) => {
       state.homeSliderImages = action.payload;
+    },
+    changeAuthModal: (state) => {
+      state.authModal = !state.authModal;
     },
     loading: (state, action) => {
       state.loading = action.payload;
@@ -50,6 +55,7 @@ export const {
   getHomeSliders,
   loading ,
     handleOpenCartModal,
+    changeAuthModal
 } = generalSlice.actions;
 
 export default generalSlice.reducer;

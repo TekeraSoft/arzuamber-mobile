@@ -1,24 +1,37 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useAuth} from "@/context/AuthContext";
 import SignIn from "@/components/SignIn";
-import {ActivityIndicator, ScrollView, Text, TouchableOpacity, View} from "react-native";
+import {ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View} from "react-native";
 import {color} from "@/constants/colors";
 import {Entypo, Feather, FontAwesome5, MaterialIcons} from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "@/store/store";
+import {getAllFavorites} from "@/store/favoritesSlice";
+import FavoriteCard from "@/components/product/FavoriteCard";
+import SignUp from "@/components/SignUp";
 
 function Profile() {
     const {session, user,loading, signOut} = useAuth()
-    if(loading) return (
-        <View style={{flex: 1, justifyContent:'center', alignItems:'center'}}>
-            <ActivityIndicator size='large' color={color.mainColor} />
-        </View>
-    )
-    if (!session) return <SignIn />;
+    const {favorites} = useSelector((state:RootState) => state.favs)
+    const {authModal} = useSelector((state:RootState) => state.general)
+
+    if (loading) {
+        return (
+            <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                <ActivityIndicator size='large' color={color.mainColor}/>
+            </View>
+        );
+    }
+
+    if (!session) {
+        return !authModal ? <SignIn/> : <SignUp/>
+    }
 
     return (
         <View className={'flex-1 bg-white'}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{padding:15}}>
-                <View className={'flex items-center justify-center gap-y-1'}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom:100}}>
+                <View className={'flex items-center justify-center gap-y-1 mx-3 mt-4'}>
                     <View className={'flex items-center justify-center gap-y-1 w-full rounded-lg border border-gray-300 p-4 bg-white'} style={{
                         shadowOffset: { width: 0, height: 3 },
                         shadowOpacity: 0.1,
@@ -87,7 +100,19 @@ function Profile() {
                         </View>
                     </View>
                 </View>
-
+                <Text className={'my-4 text-2xl font-bold ml-4'} style={{color:color.mainColor}}>Favorileriniz</Text>
+                {
+                    favorites?.length > 0 ? (
+                        <FlatList nestedScrollEnabled={true} horizontal showsHorizontalScrollIndicator={false} data={favorites} keyExtractor={(item) => item?.id?.toString()}
+                                  renderItem={({ item })=> (
+                                      <FavoriteCard product={item} />
+                                  )} />
+                    ): (
+                        <View className={'w-full flex items-center mt justify-center mt-12'}>
+                            <Text className={'text-purple-500 text-2xl font-bold italic'}>Favorilerinize Ürün Eklemediniz!</Text>
+                        </View>
+                    )
+                }
             </ScrollView>
         </View>
     )

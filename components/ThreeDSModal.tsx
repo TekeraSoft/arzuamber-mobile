@@ -28,7 +28,7 @@ const ThreeDSModal = ({ visible, htmlContent, onClose, onSuccess, onFailure }) =
 
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-            <View style={{ flex: 1, marginTop:20 }}>
+            <View style={{ flex: 1, marginTop:100, marginHorizontal:40 }}>
                 <WebView
                     originWhitelist={['*']}
                     source={{ html: htmlWithWrapper }}

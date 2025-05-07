@@ -1,6 +1,6 @@
 import {SplashScreen, Stack, useLocalSearchParams, useNavigation, useRouter} from "expo-router";
 import './globals.css'
-import {Provider} from "react-redux";
+import {Provider, useSelector} from "react-redux";
 import Toast from "react-native-toast-message";
 import {I18nextProvider} from "react-i18next";
 import i18n from "@/i18n";
@@ -10,7 +10,7 @@ import {FontAwesome5, Ionicons} from "@expo/vector-icons";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import React, {useEffect, useState} from "react";
 import {StyleSheet} from "react-native";
-import {store} from "@/store/store";
+import {RootState, store} from "@/store/store";
 import Cart from "@/components/utils/Cart";
 import {toastConfig} from "@/config/toastConfig";
 import {AuthProvider} from "@/context/AuthContext";
@@ -19,8 +19,6 @@ import {Asset} from "expo-asset";
 
 export default function RootLayout() {
     const [isAppReady, setIsAppReady] = useState(false);
-    const path = useLocalSearchParams()
-    const navigation = useNavigation();
     const router = useRouter();
 
     useEffect(() => {
@@ -85,7 +83,7 @@ export default function RootLayout() {
                     headerStyle:{backgroundColor: color.mainColor},
                 }} />
 
-                <Stack.Screen name="order-success/index" options={{
+                <Stack.Screen name="payment-success/index" options={{
                     headerTitle:'Sepetiniz',
                     headerBackTitle: " ",
                     headerBackVisible: false,
@@ -99,7 +97,7 @@ export default function RootLayout() {
                     )
                 }} />
 
-                <Stack.Screen name="order-failure/index" options={{
+                <Stack.Screen name="payment-failure/index" options={{
                     headerTitle:'Sepetiniz',
                     headerBackTitle: " ",
                     headerTitleAlign:'center',

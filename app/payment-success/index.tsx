@@ -1,7 +1,15 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { Image, Text, View } from "react-native";
+import {useDispatch} from "react-redux";
+import {clearCartAsync} from "@/store/cartSlice";
+import {AppDispatch} from "@/store/store";
 
 function OrderSuccess() {
+    const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+        dispatch(clearCartAsync())
+    }, []);
 
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center",marginHorizontal: 15 }}>

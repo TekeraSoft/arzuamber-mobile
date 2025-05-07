@@ -19,6 +19,7 @@ export const store = configureStore({
         order: orderSlice,
         favorite: favoritesSlice.reducer,
         user: userSlice.reducer,
+        favs: favoritesSlice.reducer,
     }
 })
 

@@ -52,12 +52,12 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async ({ email, password }) => {
+  const signIn = async (values) => {
     setLoading(true);
     const responseToken = await axios
       .post(`${BACKEND_API}/auth/authenticate`, {
-        email,
-        password,
+        email: values.email,
+        password: values.password,
       })
       .then(async (res) => {
         const token = res.data.accessToken;
@@ -87,11 +87,13 @@ const AuthProvider = ({ children }) => {
   const signOut = async () => {
     setLoading(true)
     await AsyncStorage.removeItem('token')
+    await AsyncStorage.removeItem('user')
     setSession(null)
     setUser(null);
+    setLoading(false)
   };
 
-  const contextData = { session, user, signIn, signOut };
+  const contextData = { session, user,loading ,signIn, signOut };
 
   return (
     <AuthContext.Provider value={contextData}>{children}</AuthContext.Provider>

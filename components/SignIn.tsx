@@ -1,21 +1,32 @@
 import React from 'react';
-import {Text, View, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform} from 'react-native';
 import TextCustom from "@/components/utils/TextCustom";
 import {color} from "@/constants/colors";
 import {useAuth} from "@/context/AuthContext";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "@/store/store";
+import {changeAuthModal} from "@/store/generalSlice";
+import {useFormik} from "formik";
+import {useLoginValidationSchema} from "@/error/loginSchema";
+import FormInput from "@/components/FormInput";
 
 function SignIn() {
-
-    const [email, setEmail] = React.useState('');
-    const [password, setPassword] = React.useState('');
+    const dispatch = useDispatch<AppDispatch>();
     const {signIn} = useAuth()
 
-    const handleSubmit = () => {
-        signIn({email, password})
-    }
+    const formik = useFormik({
+        initialValues: {
+            email: '',
+            password: ''
+        },
+        validationSchema: useLoginValidationSchema(),
+        onSubmit: (values) => {
+            signIn(values)
+        }
+    })
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding':'height'} style={styles.container}>
             <View>
                 <View className={'flex flex-col gap-y-2 w-full items-center justify-center'} style={{marginTop:-36,marginBottom:32}}>
                     <Text className={'text-center font-bold'} style={{fontSize:40,color:color.mainColor,fontStyle:'italic'}}>Giriş Yap</Text>
@@ -25,31 +36,25 @@ function SignIn() {
                     </Text>
                 </View>
 
-                <TextCustom>Email:</TextCustom>
-                <TextInput
-                    placeholder="Enter your email..."
-                    style={styles.input}
-                    value={email}
-                    onChangeText={(text) => setEmail(text)}
-                />
-
-                <TextCustom>Password:</TextCustom>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    value={password}
-                    onChangeText={(text) => setPassword(text)}
-                    secureTextEntry
-                />
+                <FormInput name={'email'} formik={formik} placeholderName={'Email'} />
+                <FormInput name={'password'} formik={formik} secureTextEntry placeholderName={'Parola'} />
 
                 <TouchableOpacity style={{backgroundColor: color.mainColor,padding: 12,
                     borderRadius: 6,
                     alignItems: "center",
-                    marginTop: 10,}} onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Login</Text>
+                    marginTop: 10,}} onPress={()=> formik.handleSubmit()}>
+                    <Text style={styles.buttonText}>Giriş</Text>
                 </TouchableOpacity>
+                <View className={'flex flex-row items-center gap-x-1 mt-6 justify-center'}>
+
+                        <Text className={'text-gray-600 text-lg'}>Üye değil misiniz ?</Text>
+                    <TouchableOpacity onPress={()=> dispatch(changeAuthModal())} className={'p-1.5 rounded-lg px-3'}>
+                        <Text className={'text-lg text-blue-600'}>Kayıt Ol</Text>
+                    </TouchableOpacity>
+                </View>
+
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -72,7 +77,7 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderRadius: 10,
-        padding: 10,
+        padding: 15,
 
         marginTop: 10,
         marginBottom: 10,

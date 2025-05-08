@@ -22,7 +22,7 @@ export const createPayAtDoor = (value: object, router) => async (dispatch) => {
     )
         .then((res) => {
             dispatch(loading(false));
-            router.push("/tr/payment-success");
+            router.push("payment-success");
             Toast.show({type:'success',text1:res.data?.message});
         })
         .catch((err) => {

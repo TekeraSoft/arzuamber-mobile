@@ -20,11 +20,12 @@ import {
   getPopulateProductsDispatch,
 } from "@/store/productSlice";
 import { color } from "@/constants/colors";
-import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
+import {AntDesign, FontAwesome5, FontAwesome6} from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { RESOURCE_API } from "@/config";
 import Card from "@/components/product/Card";
+import {router} from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 
@@ -41,7 +42,6 @@ export default function Home() {
   const { width, height } = Dimensions.get("window");
   const progress = useSharedValue<number>(0);
   const { t }: { t: (type: string) => string } = useTranslation();
-  const [testCategory, setTestCategory] = useState();
   useEffect(() => {
     dispatch(getCategoriesDispatch());
     dispatch(getAllHomeSliderImages());
@@ -50,7 +50,9 @@ export default function Home() {
   }, [dispatch]);
 
   return (
-    <ScrollView style={{backgroundColor:'white'}} showsVerticalScrollIndicator={false}>
+    <ScrollView style={{backgroundColor:'white'}}
+                contentContainerStyle={{paddingBottom:100}}
+                showsVerticalScrollIndicator={false}>
       <FlatList
         showsHorizontalScrollIndicator={false}
         horizontal
@@ -58,6 +60,7 @@ export default function Home() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
+              onPress={()=> router.push({pathname:'product', params: {categoryName: item.name}})}
             key={item.id}
             className={`flex justify-center items-center mx-2 my-4`}
           >
@@ -181,7 +184,7 @@ export default function Home() {
             İndirimleri Keşfet!
           </Text>
         </View>
-        <TouchableOpacity className={"bg-white p-2 rounded-lg"}>
+        <TouchableOpacity onPress={()=> router.push('product')} className={"bg-white p-2 rounded-lg"}>
           <Text className={"text-black text-lg"}>Keşfet</Text>
         </TouchableOpacity>
       </View>
@@ -200,13 +203,30 @@ export default function Home() {
         contentContainerStyle={{
           marginHorizontal: 5,
           gap: 12,
-          paddingBottom: 100,
         }}
         horizontal
         data={newSeasonProducts}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => <Card key={item.id} product={item} />}
       />
+
+        <View className={'flex flex-col gap-y-3 mx-3 mt-10'}>
+
+            <TouchableOpacity onPress={()=> router.push('kvkk')} className={'border border-gray-300 flex flex-row items-center justify-between w-full p-3 rounded-lg'}>
+                <Text>KVKK</Text>
+                <AntDesign name="right" size={18} color="gray" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={()=> router.push('crpolicy')} className={'border border-gray-300 flex flex-row items-center justify-between w-full p-3 rounded-lg'}>
+                <Text>İade Politikası</Text>
+                <AntDesign name="right" size={18} color="gray" />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={()=> router.push('distance-policy')} className={'border border-gray-300 flex flex-row items-center justify-between w-full p-3 rounded-lg'}>
+                <Text>Mesafeli Satış Sözleşmesi</Text>
+                <AntDesign name="right" size={18} color="gray" />
+            </TouchableOpacity>
+        </View>
     </ScrollView>
   );
 }

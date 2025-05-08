@@ -5,13 +5,13 @@ import {
 } from "react-native";
 import {Tabs, useRouter} from "expo-router";
 import {
-  FontAwesome6,
-  MaterialIcons,
+    AntDesign,
+    FontAwesome6,
+    MaterialIcons,
 } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import { color } from "@/constants/colors";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { handleOpenCartModal } from "@/store/generalSlice";
 import React, {useEffect} from "react";
 import Cart from "@/components/utils/Cart";
 import {useDispatch, useSelector} from "react-redux";
@@ -74,7 +74,7 @@ export default function TabLayout() {
             <Text className={"text-white font-bold text-2xl"}>ARZUAMBER</Text>
             <View className={"flex flex-row items-center gap-x-4"}>
                 {session ?  <TouchableOpacity
-                    onPress={() => dispatch(handleOpenCartModal())}
+                    onPress={() => router.push('profile')}
                     className={"gap-x-8 mr-3 relative"}
                 >
                     <MaterialCommunityIcons
@@ -105,7 +105,7 @@ export default function TabLayout() {
                       fontSize:28,
                   }}
                 >
-                  A
+                    <AntDesign name="home" size={28} color="white" />
                 </Text>
               </View>
             );

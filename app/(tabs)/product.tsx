@@ -23,11 +23,13 @@ import {
 import ReactNativeModal from 'react-native-modal';
 import {filterData} from "@/data/filterData";
 import Card from "@/components/product/Card";
+import {useLocalSearchParams} from "expo-router";
 
 const {width, height} = Dimensions.get('window');
 
 function Product() {
     const dispatch = useDispatch();
+    const {categoryName} = useLocalSearchParams()
     const {categories} = useSelector((state:RootState)=> state.category )
     const { products, filterProducts, loading, colors, page } = useSelector((state:RootState)=> state.product)
     const [pageable, setPageable] = useState({page: 0, size: 10})
@@ -41,7 +43,7 @@ function Product() {
     const [selectedFilters, setSelectedFilters] = useState({
         size: null,
         color: null,
-        category: null,
+        category: categoryName ?? null,
         length: null,
         sortDirection: null,
         onlyDiscounted: false,
@@ -79,6 +81,15 @@ function Product() {
         });
         setFilterCount(count);
     }, [selectedFilters]);
+
+    useEffect(() => {
+        if (categoryName && selectedFilters.category !== categoryName) {
+            setSelectedFilters(prev => ({
+                ...prev,
+                category: categoryName,
+            }));
+        }
+    }, [categoryName]);
 
 
     useEffect(() => {
@@ -123,7 +134,6 @@ function Product() {
         pageable.page,
         pageable.size,
     ]);
-
 
     return (
         <View className={'bg-white h-full'}>

@@ -7,14 +7,23 @@ import {Entypo, Feather, FontAwesome5, MaterialIcons} from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/store/store";
-import {getAllFavorites} from "@/store/favoritesSlice";
 import FavoriteCard from "@/components/product/FavoriteCard";
 import SignUp from "@/components/SignUp";
+import {getUserOrdersDispatch} from "@/store/userSlice";
+import {router} from "expo-router";
 
 function Profile() {
     const {session, user,loading, signOut} = useAuth()
     const {favorites} = useSelector((state:RootState) => state.favs)
     const {authModal} = useSelector((state:RootState) => state.general)
+    const {orders} = useSelector((state:RootState) => state.user)
+    const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+        if(user) {
+            dispatch(getUserOrdersDispatch(user?.email))
+        }
+    }, []);
 
     if (loading) {
         return (
@@ -23,6 +32,7 @@ function Profile() {
             </View>
         );
     }
+
 
     if (!session) {
         return !authModal ? <SignIn/> : <SignUp/>
@@ -60,17 +70,20 @@ function Profile() {
                     </View>
 
                     <View className={'flex flex-row gap-x-6 mt-6'}>
-                        <TouchableOpacity style={{flex: 1}} className={'bg-teal-500 p-2 rounded-lg flex flex-col w-44 justify-center items-center'}>
+                        <TouchableOpacity onPress={()=> router.push('user-order')} style={{flex: 1}} className={'bg-teal-500 p-2 rounded-lg flex flex-col w-44 justify-center items-center'}>
                             <Feather name="shopping-cart" size={32} color="white" />
-                            <Text className={'text-white text-2xl'}>0</Text>
+                            <Text className={'text-white text-2xl'}>{orders?.length}</Text>
                             <Text className={'text-white'}>Toplam Sipariş</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={{flex: 1}} className={'bg-green-500 p-2 rounded-lg flex flex-col w-44 justify-center items-center'}>
+                        <View style={{flex: 1}} className={'bg-green-500 p-2 rounded-lg flex flex-col w-44 justify-center items-center'}>
                             <FontAwesome5 name="money-bill-wave" size={32} color="white" />
-                            <Text className={'text-white text-2xl'}>0</Text>
+                            <Text className={'text-white text-2xl'}>{orders?.reduce((acc, i) => acc + i.totalPrice, 0).toLocaleString("tr-TR", {
+                                style: "currency",
+                                currency: "TRY",
+                            })}</Text>
                             <Text className={'text-white'}>Toplam Harcama (₺)</Text>
-                        </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View className={'flex flex-col gap-y-3 bg-white mt-4 w-full p-3 rounded-lg border border-gray-300'} style={{

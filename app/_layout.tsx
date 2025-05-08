@@ -125,6 +125,42 @@ export default function RootLayout() {
                     )
                 }} />
 
+                <Stack.Screen name="kvkk/index" options={{
+                    headerTitle:'Kvkk Metni',
+                    headerBackTitle: " ",
+                    headerTitleAlign:'center',
+                    headerBackButtonDisplayMode: 'minimal',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                }} />
+
+                <Stack.Screen name="crpolicy/index" options={{
+                    headerTitle:'İptal ve İade',
+                    headerBackTitle: " ",
+                    headerTitleAlign:'center',
+                    headerBackButtonDisplayMode: 'minimal',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                }} />
+
+                <Stack.Screen name="distance-policy/index" options={{
+                    headerTitle:'Mesafeli Satış Sözleşmesi',
+                    headerBackTitle: " ",
+                    headerTitleAlign:'center',
+                    headerBackButtonDisplayMode: 'minimal',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                }} />
+
+                <Stack.Screen name="user-order/index" options={{
+                    headerTitle:'Önceki Siparişlerim',
+                    headerBackTitle: " ",
+                    headerTitleAlign:'center',
+                    headerBackButtonDisplayMode: 'minimal',
+                    headerTintColor:'white',
+                    headerStyle:{backgroundColor: color.mainColor},
+                }} />
+
             </Stack>
           <Toast config={toastConfig} />
           </I18nextProvider>

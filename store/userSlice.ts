@@ -71,12 +71,12 @@ export const changePasswordDispatch = (value:object,resetForm) => async (dispatc
   })
 }
 
-export const editUserDetailsDispatch = (values: object,resetForm) => async (dispatch) => {
+export const editUserDetailsDispatch = (values: object, setOpen:any) => async (dispatch) => {
   dispatch(loading(true));
   await patchRequest({controller: 'user', action: 'edit-user-details'}, values).then((res)=> {
     dispatch(loading(false));
+    setOpen(false);
     Toast.show({type: "success", text1:res.data.message});
-    resetForm()
   }).catch(err=> {
     dispatch(loading(false));
     Toast.show({type: "error", text1:err.response.data});

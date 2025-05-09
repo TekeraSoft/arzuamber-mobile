@@ -1,7 +1,4 @@
 import {useContext, createContext, useState, useEffect} from "react";
-import { ActivityIndicator, SafeAreaView } from "react-native";
-import { color } from "@/constants/colors";
-import { postGuardRequest } from "@/services/requestservice";
 import { BACKEND_API } from "@/config";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";

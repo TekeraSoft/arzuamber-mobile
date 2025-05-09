@@ -4,13 +4,13 @@ import SignIn from "@/components/SignIn";
 import {ActivityIndicator, FlatList, ScrollView, Text, TouchableOpacity, View} from "react-native";
 import {color} from "@/constants/colors";
 import {Entypo, Feather, FontAwesome5, MaterialIcons} from "@expo/vector-icons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/store/store";
 import FavoriteCard from "@/components/product/FavoriteCard";
 import SignUp from "@/components/SignUp";
 import {getUserOrdersDispatch} from "@/store/userSlice";
 import {router} from "expo-router";
+import UserDetail from "@/components/UserDetail";
 
 function Profile() {
     const {session, user,loading, signOut} = useAuth()
@@ -23,7 +23,7 @@ function Profile() {
         if(user) {
             dispatch(getUserOrdersDispatch(user?.email))
         }
-    }, []);
+    }, [user, dispatch]);
 
     if (loading) {
         return (
@@ -86,32 +86,7 @@ function Profile() {
                         </View>
                     </View>
 
-                    <View className={'flex flex-col gap-y-3 bg-white mt-4 w-full p-3 rounded-lg border border-gray-300'} style={{
-                        shadowOffset: { width: 0, height: 3 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 5
-                    }}>
-                        <View className={'flex flex-row gap-x-4 items-center'}>
-                            <MaterialCommunityIcons name="card-account-details-outline" size={24} color="black" />
-                            <Text>{user?.nameSurname}</Text>
-                        </View>
-
-                        <View className={'flex flex-row gap-x-4 items-center'}>
-                            <MaterialIcons name="email" size={24} color="black" />
-                            <Text>{user?.email}</Text>
-                        </View>
-
-                        <View className={'flex flex-row gap-x-4 items-center'}>
-                            <Entypo name="phone" size={24} color="black" />
-                            <Text>{user?.phoneNumber}</Text>
-                        </View>
-
-                        <View className={'flex flex-row gap-x-4 items-center w-80'}>
-                            <Entypo name="address" size={24} color="black" />
-                            <Text style={{fontSize:12}}>{user?.address}</Text>
-                        </View>
-                    </View>
+                    <UserDetail user={user} />
                 </View>
                 <Text className={'my-4 text-2xl font-bold ml-4'} style={{color:color.mainColor}}>Favorileriniz</Text>
                 {

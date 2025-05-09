@@ -74,7 +74,9 @@ function FormInput({
                   style={[
                     styles.input,
                     name === "shippingAddress.address" && styles.areaInput,
+                    name === "billingAddress.address" && styles.areaInput,
                     name === "message" && styles.areaInput,
+                    name === "address" && styles.areaInput,
                     touched && error ? styles.inputError : {},
                   ]}
                   onChangeText={(e) =>formik.setFieldValue(name,e)

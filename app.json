@@ -26,12 +26,15 @@
       "favicon": "./assets/images/favicon.png"
     },
     "extra": {
-      "expoPublicResourceApi": "http://192.168.1.145:9000"
+      "expoPublicResourceApi": "http://192.168.1.145:9000",
+      "router": {},
+      "eas": {
+        "projectId": "a7397827-6489-4fc5-8716-c1c111ae45b1"
+      }
     },
     "plugins": [
       "expo-router",
-      "expo-localization",
-      "expo-video"
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true
